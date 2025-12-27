@@ -6,7 +6,7 @@ require_once 'includes/functions.php';
 $page_title = 'Dashboard';
 $current_page = 'dashboard';
 
-// Get initial stats (we'll update these via AJAX too)
+// Get initial stats
 $userId = getCurrentUserId();
 $stats = getDashboardStats($userId);
 
@@ -14,7 +14,7 @@ $stats = getDashboardStats($userId);
 ob_start();
 ?>
 
-<!-- Dashboard content starts here -->
+
 <div class="page-header">
     <div class="page-title">
         <h2>Dashboard</h2>
@@ -25,7 +25,6 @@ ob_start();
     </div>
 </div>
 
-<!-- Filters -->
 <div class="filter-section">
     <h3 class="mb-2">Filter Contacts</h3>
     <div class="filter-buttons">
@@ -47,7 +46,6 @@ ob_start();
     </p>
 </div>
 
-<!-- Contacts Table -->
 <div class="card">
     <h3 class="mb-2">Recent Contacts</h3>
     
@@ -58,7 +56,6 @@ ob_start();
     </div>
 </div>
 
-<!-- Quick Stats -->
 <div class="row mt-4">
     <div class="col">
         <div class="stat-card">
@@ -87,7 +84,7 @@ ob_start();
 </div>
 
 <script>
-// Load contacts via AJAX
+// Load contacts
 function loadContacts(filter = 'all') {
     // Show loading state
     document.getElementById('contacts-container').innerHTML = 
@@ -101,7 +98,7 @@ function loadContacts(filter = 'all') {
         }
     });
     
-    // Fetch contacts via AJAX
+    // Fetch contacts
     fetch(`api/get-contacts.php?filter=${filter}`)
         .then(response => response.json())
         .then(data => {
@@ -232,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const filter = this.getAttribute('data-filter');
             loadContacts(filter);
             
-            // Update URL without page reload (for bookmarking)
+            // Update URL without page reload
             const url = new URL(window.location);
             url.searchParams.set('filter', filter);
             window.history.pushState({}, '', url);
@@ -252,7 +249,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // Get the content and clean buffer
 $page_content = ob_get_clean();
 
-// Include header and footer templates
 require_once 'includes/header.php';
 echo $page_content;
 require_once 'includes/footer.php';

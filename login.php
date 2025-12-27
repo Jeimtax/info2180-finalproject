@@ -1,5 +1,4 @@
 <?php
-// Include required files
 require_once 'includes/config.php';
 require_once 'includes/auth.php';
 
@@ -12,7 +11,7 @@ if (isLoggedIn()) {
 $error = '';
 $success = '';
 
-// Check if we have a success message from registration
+// Checks for success message from registration
 if (isset($_SESSION['success'])) {
     $success = $_SESSION['success'];
     unset($_SESSION['success']);

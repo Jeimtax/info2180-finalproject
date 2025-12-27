@@ -1,4 +1,4 @@
-        </div> <!-- Close container from header -->
+        </div> 
     </main>
     
     <footer class="main-footer">
@@ -8,7 +8,7 @@
         </div>
     </footer>
     
-    <!-- JavaScript for AJAX functionality -->
+    
     <script>
     // AJAX filter functionality
     document.addEventListener('DOMContentLoaded', function() {

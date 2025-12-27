@@ -413,7 +413,6 @@ document.getElementById('confirm_password').addEventListener('input', function()
 // Get the content and clean buffer
 $page_content = ob_get_clean();
 
-// Include header and footer templates
 require_once 'includes/header.php';
 echo $page_content;
 require_once 'includes/footer.php';

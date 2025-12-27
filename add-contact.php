@@ -140,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Sending data:', formData);
         
         try {
-            // Send via AJAX
             const response = await fetch('api/add-contact.php', {
                 method: 'POST',
                 headers: {

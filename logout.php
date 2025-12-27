@@ -4,7 +4,6 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include auth functions
 require_once 'includes/auth.php';
 
 // Log the user out

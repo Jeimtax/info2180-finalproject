@@ -2,7 +2,7 @@
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
 
-// Only admins can view users list
+// Alows only admins to view user list
 if (!canViewUsers()) {
     header('Location: dashboard.php');
     exit();
@@ -26,7 +26,6 @@ try {
 ob_start();
 ?>
 
-<!-- Users List content starts here -->
 <div class="page-header">
     <div class="page-title">
         <h2>Users</h2>
@@ -103,7 +102,6 @@ ob_start();
 // Get the content and clean buffer
 $page_content = ob_get_clean();
 
-// Include header and footer templates
 require_once 'includes/header.php';
 echo $page_content;
 require_once 'includes/footer.php';
