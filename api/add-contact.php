@@ -1,49 +1,23 @@
 <?php
-// api/add-contact.php - FINAL VERSION
 
-// Set JSON header FIRST
-header('Content-Type: application/json');
-
-// Start session
-session_start();
-
-// Set session cookie parameters to match main site
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => $_SERVER['HTTP_HOST'] ?? 'localhost',
-    'secure' => isset($_SERVER['HTTPS']),
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
-
-session_start();
-
-// For debugging
-error_log("=== API CALL START ===");
-error_log("Session ID: " . session_id());
-error_log("User ID: " . ($_SESSION['user_id'] ?? 'NOT SET'));
-
-// Check if it's an AJAX request (optional but good practice)
-if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-    error_log("This is an AJAX request");
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
 }
 
-// Check if user is logged in
+// Set JSON header
+header('Content-Type: application/json');
+
+// Checks if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    error_log("User not logged in. Session dump: " . print_r($_SESSION, true));
-    
-    // For AJAX debugging
-    if (isset($_SERVER['HTTP_COOKIE'])) {
-        error_log("Cookies sent: " . $_SERVER['HTTP_COOKIE']);
-    }
-    
-    echo json_encode(['success' => false, 'message' => 'Not logged in']);
+    echo json_encode(['success' => false, 'message' => 'Not logged in. Please refresh and try again.']);
     exit();
 }
 
-error_log("User is logged in with ID: " . $_SESSION['user_id']);
+// Only accept POST requests
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+    exit();
+}
 
 // Get POST data
 $input = file_get_contents('php://input');
@@ -58,11 +32,9 @@ if (!$data) {
     exit();
 }
 
-error_log("Data received: " . print_r($data, true));
-
-// Simple validation
+// Validation
 $errors = [];
-$required = ['title', 'firstname', 'lastname', 'email', 'company', 'assigned_to'];
+$required = ['title', 'firstname', 'lastname', 'email', 'telephone', 'company', 'type', 'assigned_to'];
 
 foreach ($required as $field) {
     if (empty($data[$field])) {
@@ -70,8 +42,14 @@ foreach ($required as $field) {
     }
 }
 
+// Validates email format
 if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
     $errors[] = 'Please enter a valid email address.';
+}
+
+// Validates assigned_to is numeric
+if (!empty($data['assigned_to']) && !is_numeric($data['assigned_to'])) {
+    $errors[] = 'Invalid user selected.';
 }
 
 if (!empty($errors)) {
@@ -79,9 +57,8 @@ if (!empty($errors)) {
     exit();
 }
 
-// Database connection
+// Database operation
 try {
-    // Include your existing config
     require_once '../includes/config.php';
     
     $conn = getDBConnection();
@@ -92,20 +69,19 @@ try {
     $stmt = $conn->prepare($sql);
     
     $result = $stmt->execute([
-        ':title' => htmlspecialchars(trim($data['title'])),
-        ':firstname' => htmlspecialchars(trim($data['firstname'])),
-        ':lastname' => htmlspecialchars(trim($data['lastname'])),
-        ':email' => htmlspecialchars(trim($data['email'])),
-        ':telephone' => htmlspecialchars(trim($data['telephone'] ?? '')),
-        ':company' => htmlspecialchars(trim($data['company'])),
-        ':type' => htmlspecialchars(trim($data['type'] ?? 'Sales Lead')),
+        ':title' => trim($data['title']),
+        ':firstname' => trim($data['firstname']),
+        ':lastname' => trim($data['lastname']),
+        ':email' => trim($data['email']),
+        ':telephone' => trim($data['telephone']),
+        ':company' => trim($data['company']),
+        ':type' => trim($data['type']),
         ':assigned_to' => (int)$data['assigned_to'],
         ':created_by' => $_SESSION['user_id']
     ]);
     
     if ($result) {
         $contactId = $conn->lastInsertId();
-        error_log("Contact inserted with ID: " . $contactId);
         
         echo json_encode([
             'success' => true,
@@ -117,9 +93,7 @@ try {
     }
     
 } catch(PDOException $e) {
-    error_log("Database error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    error_log("Database error in add-contact.php: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Database error occurred. Please try again.']);
 }
-
-error_log("=== API CALL END ===");
 ?>
